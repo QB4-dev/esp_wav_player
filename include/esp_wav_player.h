@@ -40,11 +40,10 @@
         .mode = I2S_MODE_MASTER | I2S_MODE_TX,         \
         .sample_rate = 22050,                           \
         .bits_per_sample = 16,                          \
-        .channel_format = I2S_CHANNEL_FMT_RIGHT_LEFT,   \           
-        .communication_format = I2S_COMM_FORMAT_I2S | I2S_COMM_FORMAT_I2S_LSB, \
-        .intr_alloc_flags = ESP_INTR_FLAG_LEVEL1,       \
+        .channel_format = I2S_CHANNEL_FMT_RIGHT_LEFT,   \
+        .communication_format = I2S_COMM_FORMAT_STAND_MSB, \
         .dma_buf_count = 4,                             \
-        .dma_buf_len = 256,                             \
+        .dma_buf_len = 256,                              \
         .tx_desc_auto_clear = true                       \
     },                                                  \
     .queue_len = 4                                      \
