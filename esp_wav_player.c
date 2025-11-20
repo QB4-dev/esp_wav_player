@@ -190,37 +190,41 @@ void esp_wav_player_set_end_cb(esp_wav_player_t hdl, esp_wav_player_cb_t cb, voi
 static void wav_player_task(void *arg)
 {
     struct esp_wav_player *player = arg;
-    uint8_t                buf[WAV_BUF_SIZE];
-    size_t                 i2s_wr;
+    wav_handle_t *wavh            = NULL;
+
+    uint8_t buf[WAV_BUF_SIZE];
+    size_t  i2s_wr;
     while (1) {
-        wav_handle_t *h = NULL;
-        if (!xQueueReceive(player->queue, &h, portMAX_DELAY))
+        if (!xQueueReceive(player->queue, &wavh, portMAX_DELAY))
             continue;
+
         // Check if we received a valid handle or stop signal
-        if (h == NULL)
+        if (wavh == NULL)
             break;
 
-        player->stop_request = false;
-        player->pause_request = false;
-        player->state = ESP_WAV_PLAYER_PLAYING;
-        if (h->open(h) != 0) {
-            h->close(h);
+        if (wavh->open(wavh) != 0) {
+            wavh->close(wavh);
             player->state = ESP_WAV_PLAYER_STOPPED;
             ESP_LOGE(TAG, "wav open failed");
             continue;
         }
-        if (wav_parse_header(h) != 0) {
-            h->close(h);
+        if (wav_parse_header(wavh) != 0) {
+            wavh->close(wavh);
             player->state = ESP_WAV_PLAYER_STOPPED;
             continue;
         }
-        i2s_set_clk(player->i2s_num, h->sample_rate , h->bit_depth, h->num_channels);
+        
+        player->state = ESP_WAV_PLAYER_PLAYING;
+        player->stop_request = false;
+        player->pause_request = false;
 
         if (player->on_start)
             player->on_start(player, player->on_start_arg);
 
         float vol = player->volume / 100.0f;
-        int   bytes_left = h->data_bytes;
+        int   bytes_left = wavh->data_bytes;
+
+        i2s_set_clk(player->i2s_num, wavh->sample_rate , wavh->bit_depth, wavh->num_channels);
         while (!player->stop_request) {
             if (player->pause_request) {
                 player->state = ESP_WAV_PLAYER_PAUSED;
@@ -230,11 +234,11 @@ static void wav_player_task(void *arg)
             if (bytes_left <= 0)
                 break;
 
-            size_t n = h->read(h, buf, WAV_BUF_SIZE);
+            size_t n = wavh->read(wavh, buf, WAV_BUF_SIZE);
             if (n == 0)
                 break;
 
-            switch (h->bit_depth) {
+            switch (wavh->bit_depth) {
             case 8: {
                 uint8_t *sample = buf;
                 for (size_t i = 0; i < n; i++) {
@@ -261,8 +265,8 @@ static void wav_player_task(void *arg)
             bytes_left -= i2s_wr;
         }
         i2s_zero_dma_buffer(player->i2s_num);
-        h->close(h);
-        wav_handle_free(h);
+        wavh->close(wavh);
+        wav_handle_free(wavh);
         if (player->on_end)
             player->on_end(player, player->on_end_arg);
 
