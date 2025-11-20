@@ -16,7 +16,7 @@ struct esp_wav_player {
     i2s_pin_config_t pins;
     int              i2s_num;
 
-    volatile esp_wav_player_state_t status;
+    volatile esp_wav_player_state_t state;
     volatile bool                   stop_request;
     volatile bool                   pause_request;
 
@@ -24,8 +24,9 @@ struct esp_wav_player {
 
     esp_wav_player_cb_t on_start;
     esp_wav_player_cb_t on_end;
-    void               *on_start_arg;
-    void               *on_end_arg;
+
+    void *on_start_arg;
+    void *on_end_arg;
 };
 
 esp_err_t esp_wav_player_init(esp_wav_player_t *hdl, const esp_wav_player_config_t *cfg)
@@ -43,7 +44,7 @@ esp_err_t esp_wav_player_init(esp_wav_player_t *hdl, const esp_wav_player_config
         return ESP_FAIL;
 
     player->volume = 100;
-    player->status = ESP_WAV_PLAYER_STOPPED;
+    player->state = ESP_WAV_PLAYER_STOPPED;
 
     player->i2s_num = cfg->i2s_num;
     player->pins = cfg->i2s_pin_config;
@@ -65,7 +66,7 @@ esp_err_t esp_wav_player_deinit(esp_wav_player_t hdl)
     struct esp_wav_player *player = (struct esp_wav_player *)hdl;
 
     // Tell task to exit
-    player->status = ESP_WAV_PLAYER_STOPPED;
+    player->state = ESP_WAV_PLAYER_STOPPED;
 
     // Wake the task in case it's blocking on queue
     wav_handle_t *dummy = NULL;
@@ -116,21 +117,28 @@ esp_err_t esp_wav_player_pause(esp_wav_player_t hdl)
     return ESP_OK;
 }
 
-esp_err_t esp_wav_player_set_volume(esp_wav_player_t hdl, uint8_t v)
-{
-    struct esp_wav_player *player = (struct esp_wav_player *)hdl;
-    player->volume = v;
-    return ESP_OK;
-}
-
 esp_err_t esp_wav_player_get_state(esp_wav_player_t hdl, esp_wav_player_state_t *st)
 {
     struct esp_wav_player *player = (struct esp_wav_player *)hdl;
-    *st = player->status;
+    *st = player->state;
     return ESP_OK;
 }
 
-esp_err_t esp_wav_player_get_queue_size(esp_wav_player_t hdl, size_t *qlen)
+esp_err_t esp_wav_player_set_volume(esp_wav_player_t hdl, uint8_t vol)
+{
+    struct esp_wav_player *player = (struct esp_wav_player *)hdl;
+    player->volume = vol;
+    return ESP_OK;
+}
+
+esp_err_t esp_wav_player_get_volume(esp_wav_player_t hdl, uint8_t *vol)
+{
+    struct esp_wav_player *player = (struct esp_wav_player *)hdl;
+    *vol = player->volume;
+    return ESP_OK;
+}
+
+esp_err_t esp_wav_player_get_queued(esp_wav_player_t hdl, size_t *qlen)
 {
     struct esp_wav_player *player = hdl;
     *qlen = uxQueueMessagesWaiting(player->queue);
@@ -165,17 +173,17 @@ static void wav_player_task(void *arg)
             continue;
         player->stop_request = false;
         player->pause_request = false;
-        player->status = ESP_WAV_PLAYER_PLAYING;
+        player->state = ESP_WAV_PLAYER_PLAYING;
 
         if (h->open(h) != 0) {
             h->close(h);
-            player->status = ESP_WAV_PLAYER_STOPPED;
+            player->state = ESP_WAV_PLAYER_STOPPED;
             ESP_LOGE(TAG, "wav open failed");
             continue;
         }
         if (wav_parse_header(h) != 0) {
             h->close(h);
-            player->status = ESP_WAV_PLAYER_STOPPED;
+            player->state = ESP_WAV_PLAYER_STOPPED;
             continue;
         }
 
@@ -190,7 +198,7 @@ static void wav_player_task(void *arg)
         int   bytes_left = h->data_bytes;
         while (!player->stop_request) {
             if (player->pause_request) {
-                player->status = ESP_WAV_PLAYER_PAUSED;
+                player->state = ESP_WAV_PLAYER_PAUSED;
                 vTaskDelay(10);
                 continue;
             }
@@ -236,6 +244,6 @@ static void wav_player_task(void *arg)
         if (player->on_end)
             player->on_end(player, player->on_end_arg);
 
-        player->status = ESP_WAV_PLAYER_STOPPED;
+        player->state = ESP_WAV_PLAYER_STOPPED;
     }
 }

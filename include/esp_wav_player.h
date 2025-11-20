@@ -49,9 +49,11 @@ esp_err_t esp_wav_player_deinit(esp_wav_player_t hdl);
 esp_err_t esp_wav_player_play(esp_wav_player_t player, const wav_obj_t *src);
 esp_err_t esp_wav_player_stop(esp_wav_player_t player);
 esp_err_t esp_wav_player_pause(esp_wav_player_t player);
-esp_err_t esp_wav_player_set_volume(esp_wav_player_t player, uint8_t v);
+
 esp_err_t esp_wav_player_get_state(esp_wav_player_t player, esp_wav_player_state_t *st);
-esp_err_t esp_wav_player_get_queue_size(esp_wav_player_t hdl, size_t *qlen);
+esp_err_t esp_wav_player_set_volume(esp_wav_player_t player, uint8_t v);
+esp_err_t esp_wav_player_get_volume(esp_wav_player_t hdl, uint8_t *vol);
+esp_err_t esp_wav_player_get_queued(esp_wav_player_t hdl, size_t *qlen);
 
 void esp_wav_player_set_start_cb(esp_wav_player_t player, esp_wav_player_cb_t cb, void *arg);
 void esp_wav_player_set_end_cb(esp_wav_player_t player, esp_wav_player_cb_t cb, void *arg);
