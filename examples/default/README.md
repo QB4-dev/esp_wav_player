@@ -5,7 +5,7 @@ Connect to ESP8266 I2S DAC like PCM5102 with pinout as below:
 | pin name| function | gpio_num |
 |:---:|:---:|:---:|
 | LCK |word select| GPIO_NUM_2 |
-| BCK |continuous serial clock| GPIO_NUM_15 |
+| BCK | bit clock | GPIO_NUM_15 |
 | DIN |serial data| GPIO_NUM_3 |
 
 For ESP32, example I2S pin mappings (adjustable in your application) are shown below:
