@@ -190,7 +190,7 @@ void esp_wav_player_set_end_cb(esp_wav_player_t hdl, esp_wav_player_cb_t cb, voi
 static void wav_player_task(void *arg)
 {
     struct esp_wav_player *player = arg;
-    wav_handle_t *wavh            = NULL;
+    wav_handle_t          *wavh = NULL;
 
     uint8_t buf[WAV_BUF_SIZE];
     size_t  i2s_wr;
@@ -213,7 +213,7 @@ static void wav_player_task(void *arg)
             player->state = ESP_WAV_PLAYER_STOPPED;
             continue;
         }
-        
+
         player->state = ESP_WAV_PLAYER_PLAYING;
         player->stop_request = false;
         player->pause_request = false;
@@ -224,7 +224,7 @@ static void wav_player_task(void *arg)
         float vol = player->volume / 100.0f;
         int   bytes_left = wavh->data_bytes;
 
-        i2s_set_clk(player->i2s_num, wavh->sample_rate , wavh->bit_depth, wavh->num_channels);
+        i2s_set_clk(player->i2s_num, wavh->sample_rate, wavh->bit_depth, wavh->num_channels);
         while (!player->stop_request) {
             if (player->pause_request) {
                 player->state = ESP_WAV_PLAYER_PAUSED;

@@ -58,12 +58,12 @@ int wav_parse_header(wav_handle_t *h)
     }
 
     if (header.audio_format != 1) { // PCM
-        ESP_LOGE(TAG, "bad audio_format: %"PRIu16, header.audio_format);
+        ESP_LOGE(TAG, "bad audio_format: %" PRIu16, header.audio_format);
         return -1;
     }
 
     if (header.sample_rate < 8000 || header.sample_rate > 44100) {
-        ESP_LOGE(TAG, "bad sample_rate = %"PRIu32, header.sample_rate);
+        ESP_LOGE(TAG, "bad sample_rate = %" PRIu32, header.sample_rate);
         return -1;
     }
 
@@ -72,12 +72,12 @@ int wav_parse_header(wav_handle_t *h)
         return -1;
     }
 
-    ESP_LOGD(TAG, "num_channels=%"PRIu16, header.num_channels);
-    ESP_LOGD(TAG, "sample_rate=%"PRIu32, header.sample_rate);
-    ESP_LOGD(TAG, "byte_rate=%"PRIu32, header.byte_rate);
-    ESP_LOGD(TAG, "sample_alignment=%"PRIu16, header.sample_alignment);
-    ESP_LOGD(TAG, "bit_depth=%"PRIu16, header.bit_depth);
-    ESP_LOGD(TAG, "data_bytes=%"PRIu32, header.data_bytes);
+    ESP_LOGD(TAG, "num_channels=%" PRIu16, header.num_channels);
+    ESP_LOGD(TAG, "sample_rate=%" PRIu32, header.sample_rate);
+    ESP_LOGD(TAG, "byte_rate=%" PRIu32, header.byte_rate);
+    ESP_LOGD(TAG, "sample_alignment=%" PRIu16, header.sample_alignment);
+    ESP_LOGD(TAG, "bit_depth=%" PRIu16, header.bit_depth);
+    ESP_LOGD(TAG, "data_bytes=%" PRIu32, header.data_bytes);
 
     h->num_channels = header.num_channels;
     h->sample_rate = header.sample_rate;

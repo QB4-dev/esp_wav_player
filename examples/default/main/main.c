@@ -36,5 +36,5 @@ void app_main()
     esp_wav_player_init(&wav_player, &player_conf);
     esp_wav_player_set_volume(wav_player, 50);
     ESP_LOGI(TAG, "wav player start");
-    esp_wav_player_play(wav_player, &wav_example);          
+    esp_wav_player_play(wav_player, &wav_example);
 }

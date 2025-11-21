@@ -9,21 +9,21 @@
 typedef struct wav_handle wav_handle_t;
 
 struct wav_handle {
-    void *ctx;
-    int (*open)(wav_handle_t *h);
-    size_t (*read)(wav_handle_t *h, void *buf, size_t len);
-    int (*seek)(wav_handle_t *h, size_t offset);
-    void (*close)(wav_handle_t *h);
-    void (*clean_ctx)(wav_handle_t *h);
+    void *ctx;                                              /*!< Backend-specific context pointer. */
+    int (*open)(wav_handle_t *h);                           /*!< Open/initialize the backend (returns 0 on success). */
+    size_t (*read)(wav_handle_t *h, void *buf, size_t len); /*!< Read up to `len` bytes into `buf`. */
+    int (*seek)(wav_handle_t *h, size_t offset);            /*!< Seek to `offset` within the WAV data. */
+    void (*close)(wav_handle_t *h);                         /*!< Close the backend and release any resources. */
+    void (*clean_ctx)(wav_handle_t *h);                     /*!< Optional cleanup function for `ctx`. */
 
-    // Filled by wav_parse_header()
-    uint16_t num_channels;
-    uint32_t sample_rate;
-    uint32_t byte_rate;
-    uint32_t sample_alignment;
-    uint16_t bit_depth;
-    size_t   data_start;
-    size_t   data_bytes;
+    /* Filled by wav_parse_header() */
+    uint16_t num_channels;     /*!< Number of audio channels. */
+    uint32_t sample_rate;      /*!< Sampling rate in Hz. */
+    uint32_t byte_rate;        /*!< Bytes per second (sample_rate * block_align). */
+    uint32_t sample_alignment; /*!< Block align: number of bytes per sample frame. */
+    uint16_t bit_depth;        /*!< Bits per sample (e.g. 16). */
+    size_t   data_start;       /*!< Offset (in bytes) from start of file to audio data. */
+    size_t   data_bytes;       /*!< Number of bytes in the audio data chunk. */
 };
 
 wav_handle_t *wav_backend_embed_create(const uint8_t *start);
