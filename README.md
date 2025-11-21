@@ -58,14 +58,14 @@ esp_wav_player_set_volume(wav_player, 50); // set initial volume
     WAV_DECLARE_MMC(wav_example, "/sdcard/audio.wav");
     ```
    
-5. Start playback using play function. 
+4. Start playback using play function. 
   ```c
   esp_wav_player_play(wav_player, &wav_example);
   ```
   > [!NOTE]  
   > Files are queued and played in background, so you can put multiple files one by one  
 
-6. Stop or pause playback as needed.
+5. Stop or pause playback as needed.
 
     See examples/default/README.md for example pin mappings and a quickstart for ESP32/ESP8266.
 
